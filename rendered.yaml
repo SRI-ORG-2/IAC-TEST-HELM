@@ -1,0 +1,39 @@
+---
+# Source: iac-test/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core-commissioning-handler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+
+        # MAIN SECURE CONTAINER
+        - name: profilinghandler
+          image: "nginx:latest"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 8080
+
+        # HELM-INJECTED DATADOG CONTAINER
+                
+        - name: datadog
+          image: nginx:latest
+          ports:
+            - containerPort: 8126
